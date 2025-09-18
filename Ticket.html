@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ticket de Compra - YAMBO'S JUNGLE</title>
+    <link rel="icon" href="Logo.png">
+    <style>
+        *{
+            margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace
+        }
+
+        body{
+            background:#f0f0f0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh
+        }
+
+        .container{
+            max-width:900px;width:100%;background:white;border-radius:10px;box-shadow:0 5px 25px rgba(0,0,0,.15);overflow:hidden
+        }
+
+        .app-header{
+            background:linear-gradient(135deg,#8B4513 0%,#5D4037 100%);color:white;padding:20px;text-align:center
+        }
+
+        .app-title{
+            font-size:24px;margin-bottom:6px
+        }
+
+        .app-content{
+            padding:24px
+        }
+
+        .section-row{
+            display:flex;gap:12px;align-items:center;margin-bottom:12px
+        }
+
+        .form-section{
+            margin-bottom:20px
+        }
+
+        .section-title{
+            color:#5D4037;border-bottom:2px solid #D7CCC8;padding-bottom:10px;margin-bottom:12px;font-size:18px
+        }
+
+        label{
+            display:block;margin-bottom:6px;color:#5D4037;font-weight:700
+        }
+
+        input[type="text"], input[type="tel"]{
+            width:100%;padding:10px;border:2px solid #D7CCC8;border-radius:6px
+        }
+
+        .products-grid{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px
+        }
+
+        .product-card{
+            border:2px solid #D7CCC8;border-radius:8px;padding:12px;text-align:center;background:#FFF8F0
+        }
+
+        .quantity-controls{
+            display:flex;justify-content:center;gap:8px;align-items:center
+        }
+
+        .quantity-btn{
+            width:34px;height:34px;border:2px solid #8B4513;background:white;color:#8B4513;border-radius:6px;cursor:pointer
+        }
+
+        .quantity-input{
+            width:60px;text-align:center;border:2px solid #D7CCC8;border-radius:6px;padding:6px
+        }
+
+        .summary-table{
+            width:100%;border-collapse:collapse;margin-top:12px
+        }
+
+        .summary-table th{
+            background:#8B4513;color:white;padding:8px;text-align:left
+        }
+
+        .summary-table td{
+            padding:8px;border-bottom:1px solid #D7CCC8
+        }
+
+        .total-row{
+            background:#FFF0E0;font-weight:700
+        }
+
+        .actions{
+            display:flex;gap:12px;margin-top:12px
+        }
+
+        .btn{
+            flex:1;padding:12px;border-radius:6px;border:none;color:white;font-weight:700;cursor:pointer
+        }
+
+        .btn-generate{
+            background:linear-gradient(135deg,#8B4513 0%,#5D4037 100%)
+        }
+
+        .btn-print{
+            background:linear-gradient(135deg,#2E7D32 0%,#1B5E20 100%)
+        }
+
+        .btn-download{
+            background:linear-gradient(135deg,#1976D2 0%,#0D47A1 100%)
+        }
+
+        .ticket-preview{
+            background:#fff;border:2px dashed #8B4513;padding:16px;margin-top:16px
+        }
+
+        /* TICKET */
+        #ticket{
+            width:300px;background:#fff;padding:12px;border:1px solid #ccc;font-family:'Courier New',monospace;font-size:12px;line-height:1.3
+        }
+
+        .ticket-header{
+            text-align:center;border-bottom:1px dashed #000;padding-bottom:8px;margin-bottom:10px
+        }
+
+        .ticket-logo img{
+            width:80px;height:80px;object-fit:contain
+        }
+
+        .company-name{
+            font-weight:700;font-size:14px
+        }
+
+        .company-info{
+            font-size:10px
+        }
+
+        .ticket-date{
+            margin:6px 0;text-align:center;font-weight:700
+        }
+
+        .customer-info{
+            margin:6px 0;padding:6px;background:#f0f0f0
+        }
+
+        .ticket-items{
+            width:100%;border-collapse:collapse;margin:8px 0
+        }
+
+        .ticket-items th{
+            text-align:left;border-bottom:1px dashed #000;padding:4px 0;font-size:11px
+        }
+
+        .ticket-items td{
+            padding:3px 0;border-bottom:1px dotted #ccc;font-size:11px
+        }
+
+        .ticket-total{
+            text-align:right;font-weight:700;font-size:14px;margin-top:8px;border-top:2px dashed #000;padding-top:6px
+        }
+
+        .ticket-footer{
+            text-align:center;font-size:10px;margin-top:8px;border-top:1px dashed #000;padding-top:6px
+        }
+
+        .barcode{
+            text-align:center;margin:8px 0;font-family:'Libre Barcode 128',cursive;font-size:24px
+        }
+
+        .no-print{
+            display:inline-block
+        }
+
+        @media print{
+            body *{
+                visibility:hidden
+            }
+            #ticket,#ticket *{
+                visibility:visible
+            }
+            #ticket{
+                position: absolute;left:0;top:0;width:300px
+            }
+        }
+        .helper-small{
+            font-size:12px;color:#555;margin-left:8px
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">
+            <h1 class="app-title">Sistema de Tickets - YAMBO'S JUNGLE</h1>
+            <div style="font-size:13px">Generador y descarga de tickets</div>
+        </div>
+
+        <div class="app-content">
+            <div class="form-section">
+                <h2 class="section-title">Información del Cliente</h2>
+                <div class="section-row">
+                    <div style="flex:1">
+                        <label for="customerName">Nombre del Cliente *</label>
+                        <input type="text" id="customerName" placeholder="Ingrese nombre completo">
+                    </div>
+                    <div style="width:200px">
+                        <label for="customerPhone">Teléfono</label>
+                        <input type="tel" id="customerPhone" placeholder="311 228 31 99">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">Logo (se incluirá en el PDF)</h2>
+                <div class="section-row">
+                    <div>
+                        <label for="logoUrl">URL del logo (opcional)</label>
+                        <input type="text" id="logoUrl" placeholder="Pega la URL del logo y presiona Cargar" style="width:420px;padding:8px;border:2px solid #D7CCC8;border-radius:6px">
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-end">
+                        <button class="btn btn-generate no-print" onclick="loadLogoFromUrl()">Cargar</button>
+                        <div style="display:flex;flex-direction:column">
+                            <label for="logoInput" style="font-weight:700;color:#5D4037;font-size:12px">Subir logo</label>
+                            <input type="file" id="logoInput" accept="image/*" style="margin-top:4px">
+                        </div>
+                        
+                    </div>
+                </div>
+                <div style="margin-top:8px">
+                    <small style="color:#666">Vista previa y logo embebido estarán listos para la descarga.</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">Seleccionar Productos</h2>
+                <div class="products-grid">
+                    <!-- Repite tarjetas de producto -->
+                    <div class="product-card">
+                        <div><strong>Café Claro 100g</strong></div>
+                        <div style="color:#8B4513;font-weight:700;margin:6px 0">$70.00</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('claro-100g',-1)">-</button>
+                            <input id="claro-100g" class="quantity-input" type="number" value="0" min="0" readonly>
+                            <button class="quantity-btn" onclick="updateQuantity('claro-100g',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <div><strong>Café Claro 500g</strong></div>
+                        <div style="color:#8B4513;font-weight:700;margin:6px 0">$180.00</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('claro-500g',-1)">-</button>
+                            <input id="claro-500g" class="quantity-input" type="number" value="0" min="0" readonly>
+                            <button class="quantity-btn" onclick="updateQuantity('claro-500g',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <div><strong>Café Oscuro 100g</strong></div>
+                        <div style="color:#8B4513;font-weight:700;margin:6px 0">$70.00</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('oscuro-100g',-1)">-</button>
+                            <input id="oscuro-100g" class="quantity-input" type="number" value="0" min="0" readonly>
+                            <button class="quantity-btn" onclick="updateQuantity('oscuro-100g',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <div><strong>Café Oscuro 500g</strong></div>
+                        <div style="color:#8B4513;font-weight:700;margin:6px 0">$180.00</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('oscuro-500g',-1)">-</button>
+                            <input id="oscuro-500g" class="quantity-input" type="number" value="0" min="0" readonly>
+                            <button class="quantity-btn" onclick="updateQuantity('oscuro-500g',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <div><strong>Café Mixto 100g</strong></div>
+                        <div style="color:#8B4513;font-weight:700;margin:6px 0">$70.00</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('mixto-100g',-1)">-</button>
+                            <input id="mixto-100g" class="quantity-input" type="number" value="0" min="0" readonly>
+                            <button class="quantity-btn" onclick="updateQuantity('mixto-100g',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <div><strong>Café Mixto 500g</strong></div>
+                        <div style="color:#8B4513;font-weight:700;margin:6px 0">$180.00</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('mixto-500g',-1)">-</button>
+                            <input id="mixto-500g" class="quantity-input" type="number" value="0" min="0" readonly>
+                            <button class="quantity-btn" onclick="updateQuantity('mixto-500g',1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">Resumen de Compra</h2>
+                <table class="summary-table">
+                    <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Total</th></tr></thead>
+                    <tbody id="summary-body"><tr><td colspan="4" style="text-align:center;padding:12px;color:#999">Seleccione productos</td></tr></tbody>
+                    <tr class="total-row"><td colspan="3">TOTAL</td><td id="total-amount">$0.00</td></tr>
+                </table>
+
+                <div class="actions">
+                    <button class="btn btn-generate no-print" onclick="generateTicket()">Generar Ticket</button>
+                    <button class="btn btn-print no-print" onclick="printTicket()">Imprimir Ticket</button>
+                    <button class="btn btn-download no-print" onclick="downloadTicket()">Descargar Ticket (A4)</button>
+                </div>
+            </div>
+
+            <div class="ticket-preview no-print">
+                <h2 class="section-title">Vista Previa del Ticket</h2>
+                <div id="ticket">
+                    <div class="ticket-header">
+                        <div class="ticket-logo">
+                            <!-- Imagen inicial (puede ser URL); será convertida a data URL si es posible. -->
+                            <img id="logoImg" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/dd0d1003-d0af-4d9a-9b0f-5df330d44c65.png" alt="Logo YAMBO'S JUNGLE">
+                        </div>
+                        <div class="company-name">YAMBO'S JUNGLE</div>
+                        <div class="company-info">Yambos Jungle Café Natural, Tecuitata, Nayarit<br>Tel: 311 228 31 99<br>www.yambosjungle.com</div>
+                    </div>
+
+                    <div class="ticket-date">FECHA: <span id="ticket-date-span">--/--/----</span><br>HORA: <span id="ticket-time-span">--:--:--</span></div>
+
+                    <div class="customer-info">CLIENTE: <span id="ticket-customer">-------------------------</span><br>TEL: <span id="ticket-phone">---------------</span></div>
+
+                    <table class="ticket-items"><thead><tr><th>PRODUCTO</th><th>CAN</th><th>PRECIO</th><th>TOTAL</th></tr></thead>
+                        <tbody id="ticket-items-body"><tr><td colspan="4" style="text-align:center;padding:10px 0">*** SIN PRODUCTOS ***</td></tr></tbody>
+                    </table>
+
+                    <div class="ticket-total">TOTAL: $<span id="ticket-total-amount">0.00</span></div>
+
+                    <div class="barcode">*1234567890*</div>
+
+                    <div class="ticket-footer">¡GRACIAS POR SU COMPRA!<br>** Este ticket es su comprobante **<br>RFC: CAR123456ABC<br>Folio: #<span id="ticket-folio">000001</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dependencias -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+    <script>
+        // datos producto
+        const prices = {'claro-100g':70.00,'claro-500g':180.00,'oscuro-100g':70.00,'oscuro-500g':180.00,'mixto-100g':70.00,'mixto-500g':180.00};
+        const productNames = {'claro-100g':'Café Claro 100g','claro-500g':'Café Claro 500g','oscuro-100g':'Café Oscuro 100g','oscuro-500g':'Café Oscuro 500g','mixto-100g':'Café Mixto 100g','mixto-500g':'Café Mixto 500g'};
+        const shortNames = {'claro-100g':'CLARO 100G','claro-500g':'CLARO 500G','oscuro-100g':'OSCURO 100G','oscuro-500g':'OSCURO 500G','mixto-100g':'MIXTO 100G','mixto-500g':'MIXTO 500G'};
+        let currentFolio = 1;
+
+        // Manejo logo: preferimos dataURL para evitar problemas CORS
+        const logoImg = document.getElementById('logoImg');
+        const logoInput = document.getElementById('logoInput');
+        const logoUrlInput = document.getElementById('logoUrl');
+
+        // Cuando usuario sube un archivo, lo convertimos a data URL inmediatamente
+        logoInput.addEventListener('change', async (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev){
+                logoImg.src = ev.target.result;
+                logoImg.dataset.dataurl = ev.target.result;
+                alert('Logo cargado correctamente desde archivo local.');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Función para intentar cargar la URL y convertir a dataURL (si servidor permite CORS)
+        async function loadLogoFromUrl(){
+            const url = logoUrlInput.value.trim();
+            if(!url){ alert('Ingresa la URL del logo'); return; }
+            // Cambiar src para vista previa inmediata
+            logoImg.src = url;
+            // Intentar convertir a dataURL para evitar problemas de html2canvas
+            try {
+                const response = await fetch(url, {mode: 'cors'});
+                if(!response.ok) throw new Error('No se pudo descargar la imagen: ' + response.status);
+                const blob = await response.blob();
+                const dataUrl = await blobToDataURL(blob);
+                logoImg.src = dataUrl;
+                logoImg.dataset.dataurl = dataUrl;
+                alert('Logo cargado y embebido correctamente (CORS ok).');
+            } catch (err) {
+                console.warn('No se pudo convertir logo a dataURL vía fetch (posible CORS):', err);
+                alert('No se pudo convertir automáticamente la URL a data URL (problema CORS). Por favor sube el logo con "Subir logo" o hospeda la imagen con CORS habilitado.');
+            }
+        }
+
+        function blobToDataURL(blob){
+            return new Promise((resolve,reject)=>{
+                const reader = new FileReader();
+                reader.onload = ()=>resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // funciones productos/resumen/ticket (igual que antes)
+        function updateQuantity(productId, change){
+            const input = document.getElementById(productId);
+            let value = parseInt(input.value) + change;
+            if (isNaN(value) || value < 0) value = 0;
+            input.value = value;
+            updateSummary();
+        }
+
+        function updateSummary(){
+            const summaryBody = document.getElementById('summary-body');
+            summaryBody.innerHTML = '';
+            let total = 0;
+            let found=false;
+            for(const id in prices){
+                const q = parseInt(document.getElementById(id).value) || 0;
+                if(q>0){
+                    found=true;
+                    const p = prices[id];
+                    const rowTotal = p*q;
+                    total += rowTotal;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${productNames[id]}</td><td>${q}</td><td>$${p.toFixed(2)}</td><td>$${rowTotal.toFixed(2)}</td>`;
+                    summaryBody.appendChild(tr);
+                }
+            }
+            if(!found){
+                summaryBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:12px;color:#999">Seleccione productos</td></tr>`;
+            }
+            document.getElementById('total-amount').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function generateTicket(){
+            const name = document.getElementById('customerName').value.trim() || 'CLIENTE NO IDENTIFICADO';
+            const phone = document.getElementById('customerPhone').value.trim() || 'SIN TELÉFONO';
+            if(name === 'CLIENTE NO IDENTIFICADO'){ alert('Por favor ingrese el nombre del cliente'); return false; }
+            document.getElementById('ticket-customer').textContent = name;
+            document.getElementById('ticket-phone').textContent = phone;
+            const now = new Date();
+            document.getElementById('ticket-date-span').textContent = now.toLocaleDateString('es-ES');
+            document.getElementById('ticket-time-span').textContent = now.toLocaleTimeString('es-ES');
+
+            const ticketBody = document.getElementById('ticket-items-body');
+            ticketBody.innerHTML = '';
+            let total=0; let any=false;
+            for(const id in prices){
+                const q = parseInt(document.getElementById(id).value) || 0;
+                if(q>0){
+                    any=true;
+                    const p = prices[id];
+                    const rowTotal = p*q;
+                    total += rowTotal;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${shortNames[id]}</td><td>${q}</td><td>$${p.toFixed(2)}</td><td>$${rowTotal.toFixed(2)}</td>`;
+                    ticketBody.appendChild(tr);
+                }
+            }
+            if(!any) ticketBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:10px 0">*** SIN PRODUCTOS ***</td></tr>`;
+            document.getElementById('ticket-total-amount').textContent = total.toFixed(2);
+            document.getElementById('ticket-folio').textContent = currentFolio.toString().padStart(6,'0');
+            currentFolio++;
+            return true;
+        }
+
+        function printTicket(){ window.print(); }
+
+        // Asegura que el logo esté en dataURL (si ya lo está, devuelve rápido).
+        async function ensureLogoDataURL(){
+            // Si ya tenemos dataurl en dataset, ok.
+            if(logoImg.dataset && logoImg.dataset.dataurl) return;
+            const src = logoImg.src || '';
+            if(src.startsWith('data:')){ logoImg.dataset.dataurl = src; return; }
+
+            // Intentar fetch (si no, el usuario deberá subir el logo).
+            try {
+                const resp = await fetch(src, {mode:'cors'});
+                if(!resp.ok) throw new Error('fetch fail ' + resp.status);
+                const blob = await resp.blob();
+                const data = await blobToDataURL(blob);
+                logoImg.src = data;
+                logoImg.dataset.dataurl = data;
+            } catch (err) {
+                console.warn('No se pudo convertir logo remoto a dataURL (CORS):', err);
+                // No lanzar error: dejamos la imagen como está (html2canvas fallará si la imagen es cross-origin).
+                // Notificamos al usuario para que suba el logo si desea descargarse correctamente.
+                // Pero no interrumpimos la ejecución; downloadTicket comprobará esto.
+            }
+        }
+
+        // Función principal para generar PDF A4 centrado con márgenes y nombre con fecha + folio.
+        async function downloadTicket(){
+            // 1) Generar datos del ticket
+            const ok = generateTicket();
+            if(!ok) return;
+
+            // 2) Asegurarnos que logo esté embebido como dataURL si es posible
+            await ensureLogoDataURL();
+
+            // 3) Si la img aún no tiene dataurl, pedimos al usuario que suba el logo o confirme continuar.
+            if(!(logoImg.dataset && logoImg.dataset.dataurl)){
+                const proceed = confirm('El logo parece estar en un dominio sin CORS y no pudo convertirse automáticamente. Para asegurar que el logo aparezca en el PDF, sube el archivo del logo ahora o presiona Cancelar para continuar sin logo. ¿Deseas subir el logo ahora?');
+                if(proceed){
+                    // abrir selector de archivos
+                    logoInput.click();
+                    // Esperamos a que el usuario cargue manualmente (o cancele). Le damos 60s para cargar.
+                    try {
+                        await waitForFileInput(60000);
+                        // ahora debería estar en dataURL (porque el listener de logoInput lo convierte)
+                        if(!(logoImg.dataset && logoImg.dataset.dataurl)){
+                            alert('No se detectó un archivo. Se generará el PDF sin logo.');
+                        }
+                    } catch(e){
+                        alert('Tiempo de espera agotado. Se generará el PDF sin logo.');
+                    }
+                } else {
+                    // usuario decidió continuar sin subir archivo
+                }
+            }
+
+            // 4) Generar canvas con html2canvas (esperamos que la imagen no esté tainted)
+            const ticketEl = document.getElementById('ticket');
+            try {
+                const scale = 2; // mejor resolución
+                const canvas = await html2canvas(ticketEl, {scale: scale, useCORS: true, backgroundColor: '#ffffff'});
+                const imgData = canvas.toDataURL('image/png');
+
+                // Convertir px->mm (asumiendo 96 DPI)
+                const pxToMm = px => px * 25.4 / 96;
+                const imgWidthMm = pxToMm(canvas.width);
+                const imgHeightMm = pxToMm(canvas.height);
+
+                // A4 mm
+                const A4_W = 210, A4_H = 297, margin = 10;
+                const availW = A4_W - margin*2, availH = A4_H - margin*2;
+                const scaleFactor = Math.min(availW / imgWidthMm, availH / imgHeightMm, 1);
+                const finalW = imgWidthMm * scaleFactor, finalH = imgHeightMm * scaleFactor;
+                const x = (A4_W - finalW) / 2, y = (A4_H - finalH) / 2;
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({unit:'mm', format:'a4', orientation:'portrait'});
+
+                // fondo blanco
+                pdf.setFillColor(255,255,255);
+                pdf.rect(0,0,A4_W,A4_H,'F');
+
+                pdf.addImage(imgData,'PNG', x, y, finalW, finalH);
+
+                // nombre con fecha y folio (folio mostrado en el ticket)
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth()+1).padStart(2,'0');
+                const dd = String(now.getDate()).padStart(2,'0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+                const folioEl = document.getElementById('ticket-folio').textContent || '000000';
+                const filename = `ticket_${dateStr}_folio_${folioEl}.pdf`;
+
+                pdf.save(filename);
+            } catch (err) {
+                console.error('Error generando PDF:', err);
+                alert('Ocurrió un error al generar el PDF. Revisa la consola. Si el problema es el logo, intenta subirlo con "Subir logo" antes de descargar.');
+            }
+        }
+
+        // Utility: espera a que el input file reciba un archivo (timeout ms)
+        function waitForFileInput(timeout=60000){
+            return new Promise((resolve,reject)=>{
+                const start = Date.now();
+                function check(){
+                    if(logoInput.files && logoInput.files.length>0) return resolve();
+                    if(Date.now() - start > timeout) return reject(new Error('timeout'));
+                    setTimeout(check,500);
+                }
+                check();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', ()=>{ updateSummary(); });
+    </script>
+</body>
+</html>
